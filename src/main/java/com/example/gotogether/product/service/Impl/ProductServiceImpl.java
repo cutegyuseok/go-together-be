@@ -143,7 +143,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ResponseEntity<?> findProductByCategory(Long categoryId, int page) {
+    public ResponseEntity<?> findProductByCategory(Long categoryId, int page, String sort,LocalDate localDate,int people) {
         try {
             if (page < 1) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             PageRequest pageable = PageRequest.of(page - 1, Product_List_By_Category);
@@ -166,7 +166,10 @@ public class ProductServiceImpl implements ProductService {
             // 페이징 처리된 리스트노출용 상품 정보로 전환
             pageResponseDTO.setContent(productListResDTOS);
              */
-            Page<Product> products = productRepository.searchByCategories(pageable,listOfCategory(category));
+            Page<Product> products = productRepository.searchByCategories(pageable,listOfCategory(category),sort,localDate,people);
+            if (products.getTotalElements()<1){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
             PageResponseDTO pageResponseDTO = new PageResponseDTO(products);
             pageResponseDTO.setContent(products.getContent().stream().map(ProductDTO.ProductListResDTO::new).collect(Collectors.toList()));
             return new ResponseEntity<>(pageResponseDTO, HttpStatus.OK);
